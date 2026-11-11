@@ -14,10 +14,12 @@ import java.nio.file.*;
  */
 public class NotesController {
 
-    private boolean useModern = false;
+    private boolean useModern = true;
 
-    @FXML private TextArea textArea;
-    @FXML private Label statusLabel;
+    @FXML
+    private TextArea textArea;
+    @FXML
+    private Label statusLabel;
 
     private File currentFile;  // Tracks the currently open/saved file
 
@@ -31,7 +33,7 @@ public class NotesController {
 
     /** Called when user clicks "Open". */
     @FXML
-    private void handleOpen() {
+    private void handleOpen() throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
         File file = fileChooser.showOpenDialog(new Stage());
@@ -44,18 +46,41 @@ public class NotesController {
         //   2. Read line by line and append to a StringBuilder.
         //   3. Update textArea with the file content.
         //   4. Close the reader safely (try-with-resources).
-        //
-        // OPTION B: Using java.nio.file.Files (modern approach)
-        //   1. Use Files.readString(file.toPath(), StandardCharsets.UTF_8)
-        //      to read the entire content in one call.
-        //   2. Set the result into textArea.
+
+        if (!useModern) {
+            try (BufferedReader br = new BufferedReader(new FileReader(currentFile))) {
+                StringBuilder content = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    content.append(line).append("\n");
+                }
+                textArea.setText(content.toString());
+            }
+        } else {
+
+            // OPTION B: Using java.nio.file.Files (modern approach)
+            //   1. Use Files.readString(file.toPath(), StandardCharsets.UTF_8)
+            //      to read the entire content in one call.
+            //   2. Set the result into textArea.
+
+            try (BufferedReader br = Files.newBufferedReader(currentFile.toPath(), StandardCharsets.UTF_8)) {
+                StringBuilder content = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    content.append(line).append("\n");
+                }
+                textArea.setText(content.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         statusLabel.setText("Opened: " + file.getName());
     }
 
     /** Called when user clicks "Save". */
     @FXML
-    private void handleSave() {
+    private void handleSave() throws IOException {
         if (currentFile == null) {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save File");
@@ -70,11 +95,33 @@ public class NotesController {
         //   1. Create a BufferedWriter for currentFile.
         //   2. Write the content from textArea.
         //   3. Close the writer with try-with-resources.
-        //
-        // OPTION B: Using java.nio.file.Files (modern approach)
-        //   1. Use Files.writeString(currentFile.toPath(), content, StandardCharsets.UTF_8)
-        //      to save in a single line.
 
+        String[] lines = content.split("\n");
+        if (!useModern) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(currentFile))) {
+                for (String line : lines) {
+                    bw.write(line);
+                    bw.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        } else {
+
+            // OPTION B: Using java.nio.file.Files (modern approach)
+            //   1. Use Files.writeString(currentFile.toPath(), content, StandardCharsets.UTF_8)
+            //      to save in a single line.
+
+            try (BufferedWriter bw = Files.newBufferedWriter(currentFile.toPath(), StandardCharsets.UTF_8)) {
+                StringBuilder sb = new StringBuilder();
+                for (String line : lines){
+                    sb.append(line).append("\n");
+                }
+                bw.write(sb.toString());
+            }
+
+        }
         statusLabel.setText("Saved: " + currentFile.getName());
     }
 }

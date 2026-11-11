@@ -10,10 +10,16 @@ import java.io.IOException;
 public class NotesApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(NotesApp.class.getResource("notes_view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/dk/sea/views/notes_view.fxml"));
+        Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
+    }
+}
+
+class Launcher {
+    static void main(String[] args) {
+        Application.launch(NotesApp.class, args);
     }
 }
