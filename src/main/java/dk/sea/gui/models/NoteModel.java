@@ -3,7 +3,7 @@ package dk.sea.gui.models;
 import dk.sea.bll.NotesManager;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
 
 public class NoteModel {
     NotesManager notesManager;
@@ -12,12 +12,11 @@ public class NoteModel {
         notesManager = new NotesManager();
     }
 
-    public String loadFile(File file){
-        StringBuilder content = new StringBuilder();
-        List<String> data = notesManager.readFile(file);
-        for (String line : data){
-            content.append(line).append("\n");
-        }
-        return content.toString();
+    public String loadFile(File file) throws IOException {
+        return notesManager.readFile(file);
+    }
+
+    public void saveFile(File file, String content){
+        notesManager.writeToFile(file, content);
     }
 }

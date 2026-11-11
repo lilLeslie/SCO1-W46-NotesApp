@@ -1,22 +1,23 @@
 package dk.sea.dal;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NoteDAO {
-    public List<String> readFile(File file) {
+    public List<String> readFile(Path filePath) throws IOException {
+        try {
+            return Files.readAllLines(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            List<String> lines = new ArrayList<>();
-            String line;
-            while ((line = br.readLine()) != null){
-                lines.add(line);
-            }
-            return lines;
+    public void writeToFile(Path filePath, List<String> data) {
+        try{
+            Files.write(filePath, data);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -14,9 +14,6 @@ import java.nio.file.*;
  * Controller class for NotesApp.
  */
 public class NotesController {
-
-    private boolean useModern = true;
-
     @FXML
     private TextArea textArea;
     @FXML
@@ -59,41 +56,8 @@ public class NotesController {
             currentFile = fileChooser.showSaveDialog(new Stage());
         }
         if (currentFile == null) return;
-
         String content = textArea.getText();
-
-        // --- Training area #2 ---
-        // OPTION A: Using BufferedWriter / FileWriter (classic I/O)
-        //   1. Create a BufferedWriter for currentFile.
-        //   2. Write the content from textArea.
-        //   3. Close the writer with try-with-resources.
-
-        String[] lines = content.split("\n");
-        if (!useModern) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(currentFile))) {
-                for (String line : lines) {
-                    bw.write(line);
-                    bw.newLine();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        } else {
-
-            // OPTION B: Using java.nio.file.Files (modern approach)
-            //   1. Use Files.writeString(currentFile.toPath(), content, StandardCharsets.UTF_8)
-            //      to save in a single line.
-
-            try (BufferedWriter bw = Files.newBufferedWriter(currentFile.toPath(), StandardCharsets.UTF_8)) {
-                StringBuilder sb = new StringBuilder();
-                for (String line : lines){
-                    sb.append(line).append("\n");
-                }
-                bw.write(sb.toString());
-            }
-
-        }
+        noteModel.saveFile(currentFile, content);
         statusLabel.setText("Saved: " + currentFile.getName());
     }
 }
